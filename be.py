@@ -4,7 +4,7 @@ import time
 
 def start_server(port):
     # Start the HTTP server in the background
-    return subprocess.Popen(['python', '-m', 'http.server', str(port), '--directory', 'resources/server'+str(port)])
+    return subprocess.Popen(['python3', '-m', 'http.server', str(port), '--directory', 'resources/server'+str(port)])
 
 
 def main():
