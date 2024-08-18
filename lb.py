@@ -1,4 +1,4 @@
-from load_balancer import LoadBalancer
+from src.load_balancer import LoadBalancer
 from flask import Flask
 import requests
 
