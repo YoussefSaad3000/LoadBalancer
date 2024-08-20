@@ -13,6 +13,8 @@ def start_server(port):
     return subprocess.Popen([PYTHON_VERSION, '-m', 'http.server', str(port), '--directory', 'resources/server'+str(port)])
 
 
+
+
 def main():
     # Start three servers
     processes = []

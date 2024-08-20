@@ -20,6 +20,8 @@ def home():
         return f"Exception occurred while fetching the server {e}"
 
 
+
+
 if __name__ == '__main__':
     # Use host='0.0.0.0' to make the server publicly accessible
     servers = ["http://localhost:8080", "http://localhost:8081", "http://localhost:8082"]
