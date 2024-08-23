@@ -3,7 +3,6 @@ import time
 import json
 
 
-
 def start_server(port):
     with open('config.json', 'r') as file:
         config = json.load(file)
@@ -11,8 +10,6 @@ def start_server(port):
 
     # Start the HTTP server in the background
     return subprocess.Popen([PYTHON_VERSION, '-m', 'http.server', str(port), '--directory', 'resources/server'+str(port)])
-
-
 
 
 def main():
