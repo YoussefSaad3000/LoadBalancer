@@ -1,6 +1,7 @@
 import time
 from concurrent.futures import as_completed, Future
 from typing import List, Dict
+import signal
 
 import requests
 from concurrent.futures import ThreadPoolExecutor
@@ -8,6 +9,14 @@ from concurrent.futures import ThreadPoolExecutor
 
 HEALTH_CHECK_PERIOD = 10
 MAX_SERVERS = 5
+SERVER_LOOKUP_TIMEOUT = 20
+
+def timeout_handler(signum, frame):
+    raise TimeoutException
+
+class TimeoutException(Exception):
+    pass
+
 
 
 class Server:
@@ -28,21 +37,42 @@ class LoadBalancer:
     def __init__(self, servers: List[Server]):
         self.servers = servers
         self.pointer = 0
-        self.health_check_ticker()
+        self.servers_lenght =  len(servers)
+        self.set_health_checker()
 
-    def get_next_server(self):
+    def set_health_checker(self):
+        executor = ThreadPoolExecutor(max_workers=1)
+        executor.submit(self.health_check_ticker)          
+
+    def get_servers(self):
+        return self.servers
+
+    def get_server_by_idx(self, idx) -> Server:  
+        assert (0<= idx < self.servers_lenght)
+        return self.servers[idx]
+
+
+    def get_next_server(self) -> str:
+        start_time = time.time()
+
+        while not self.servers[self.pointer].is_healthy:
+            self.pointer = (self.pointer + 1) % self.servers_lenght
+            
+            # Timeout check - avoid infinite loop
+            if time.time() - start_time > SERVER_LOOKUP_TIMEOUT:
+                return ""
+
         chosen = self.servers[self.pointer]
-        self.pointer = (self.pointer+1) % len(self.servers)
+        self.pointer = (self.pointer + 1) % self.servers_lenght
         return chosen.endpoint
+
 
     @staticmethod
     def is_server_up(server: Server):
         try:
             response = requests.get(server.endpoint, timeout=5)
-            # Check if the status code is 200 (OK)
             server.is_healthy = response.status_code == 200
         except requests.exceptions.RequestException:
-            # Catch any network-related errors
             server.is_healthy = False
         finally:
             print(server)
